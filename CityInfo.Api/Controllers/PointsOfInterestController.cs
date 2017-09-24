@@ -1,22 +1,39 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using CityInfo.Api.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CityInfo.Api.Controllers
 {
     [Route("api/cities")]
     public class PointsOfInterestController : Controller
     {
+        private readonly ILogger<PointsOfInterestController> _logger;
+
+        public PointsOfInterestController(ILogger<PointsOfInterestController> logger)
+        {
+            _logger = logger;
+        }
         [HttpGet("{cityId}/pointsofinterest")]
         public IActionResult GetPointsOfInterest(int cityId)
         {
-            var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
-            if (city == null)
+            try
             {
-                return NotFound();
+                var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
+                if (city == null)
+                {
+                    _logger.LogInformation($"City with id {cityId} wasn't found when acccessing points of interest.");
+                    return NotFound();
+                }
+                return Ok(city.PointsOfInterest);
             }
-            return Ok(city.PointsOfInterest);
+            catch (Exception ex)
+            {
+                _logger.LogCritical($"Exception while getting points of interest for the city with id {cityId}.", ex);
+                return StatusCode(500, "A problem happened while handling your request.");
+            }
         }
 
         [HttpGet("{cityId}/pointsofinterest/{id}", Name = "GetPointOfInterest")]
@@ -45,7 +62,7 @@ namespace CityInfo.Api.Controllers
                 return BadRequest();
             }
 
-            if(pointOfInterest.Description == pointOfInterest.Name)
+            if (pointOfInterest.Description == pointOfInterest.Name)
             {
                 ModelState.AddModelError("Description", "The provided description should be different from the name.");
             }
@@ -54,7 +71,7 @@ namespace CityInfo.Api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            
+
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
 
             if (city == null)
@@ -87,12 +104,12 @@ namespace CityInfo.Api.Controllers
         public IActionResult UpdatePointOfInterest(int cityId, int id,
             [FromBody] PointOfInterestForUpdateDto pointOfinterest)
         {
-            if(pointOfinterest == null)
+            if (pointOfinterest == null)
             {
                 return BadRequest();
             }
 
-            if(pointOfinterest.Description == pointOfinterest.Name)
+            if (pointOfinterest.Description == pointOfinterest.Name)
             {
                 ModelState.AddModelError("Description", "The provided description should be different from the name.");
             }
@@ -104,7 +121,7 @@ namespace CityInfo.Api.Controllers
 
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
 
-            if(city == null)
+            if (city == null)
             {
                 return NotFound();
             }
@@ -126,21 +143,21 @@ namespace CityInfo.Api.Controllers
         public IActionResult PartiallyUpdatePointOfInterest(int cityId, int id,
             [FromBody] JsonPatchDocument<PointOfInterestForUpdateDto> patchDoc)
         {
-            if(patchDoc == null)
+            if (patchDoc == null)
             {
                 return BadRequest();
             }
 
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
 
-            if(city == null)
+            if (city == null)
             {
                 return NotFound();
             }
 
             var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(x => x.Id == id);
 
-            if(pointOfInterestFromStore == null)
+            if (pointOfInterestFromStore == null)
             {
                 return NotFound();
             }
@@ -159,7 +176,7 @@ namespace CityInfo.Api.Controllers
                 return BadRequest(ModelState);
             }
 
-            if(pointOfInterestToPatch.Description == pointOfInterestToPatch.Name)
+            if (pointOfInterestToPatch.Description == pointOfInterestToPatch.Name)
             {
                 ModelState.AddModelError("Description", "The provided description should be different from the name.");
             }
@@ -182,14 +199,14 @@ namespace CityInfo.Api.Controllers
         {
             var city = CitiesDataStore.Current.Cities.FirstOrDefault(x => x.Id == cityId);
 
-            if(city == null)
+            if (city == null)
             {
                 return NotFound();
             }
 
             var pointOfInterestFromStore = city.PointsOfInterest.FirstOrDefault(x => x.Id == id);
 
-            if(pointOfInterestFromStore == null)
+            if (pointOfInterestFromStore == null)
             {
                 return NotFound();
             }
