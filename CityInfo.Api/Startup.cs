@@ -13,7 +13,8 @@ namespace CityInfo.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc()
-                .AddMvcOptions(x=> x.OutputFormatters.Add(new XmlDataContractSerializerOutputFormatter()));
+                .AddMvcOptions(x=> x.OutputFormatters.Add(
+                    new XmlDataContractSerializerOutputFormatter()));
                 //.AddJsonOptions(o =>
                 //{
                 //    if (o.SerializerSettings.ContractResolver != null)
