@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Extensions.Logging;
@@ -11,9 +13,16 @@ namespace CityInfo.Api
 {
     public class Startup
     {
-        public Startup(IHostingEnvironment env)
+        public static IConfiguration Configuration { get; private set; }
+
+        public Startup(IHostingEnvironment env, IConfiguration configuration)
         {
+            Configuration = configuration;
+
             env.ConfigureNLog("nlog.config");
+
+
+
         }
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -36,6 +45,8 @@ namespace CityInfo.Api
 #else
             services.AddTransient<IMailService, CloudMailService>();
 #endif
+            const string connectionString = "Server=localhost;Database=CityInfoDb;User Id=sql; Password=sql;Trusted_Connection=True;";
+            services.AddDbContext<CityInfoContext>(o => o.UseSqlServer(connectionString));
 
         }
 
