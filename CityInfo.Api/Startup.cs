@@ -1,4 +1,6 @@
-﻿using CityInfo.Api.Services;
+﻿using CityInfo.Api.Entities;
+using CityInfo.Api.Models;
+using CityInfo.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Formatters;
@@ -48,6 +50,8 @@ namespace CityInfo.Api
             var connectionString = Configuration["connectionStrings:cityOfDbConnectionString"];
             services.AddDbContext<CityInfoContext>(o => o.UseSqlServer(connectionString));
 
+            services.AddScoped<ICityInfoRepository, CityInfoRepository>();
+
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -76,6 +80,13 @@ namespace CityInfo.Api
             cityInfoContext.EnsureSeedDataForContext();
 
             app.UseStatusCodePages();
+
+            AutoMapper.Mapper.Initialize(cfg =>
+            {
+                cfg.CreateMap<City, CityWithoutPointsOfInterestDto>();
+                cfg.CreateMap<City, CityDto>();
+                cfg.CreateMap<PointOfInterest, PointOfInterestDto>();
+            });
 
             app.UseMvc();
 
