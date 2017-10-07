@@ -26,14 +26,19 @@ namespace CityInfo.Api.Services
             return _context.Cities.Any(x => x.Id == cityId);
         }
 
+        public void DeletePointOfInterest(PointOfInterest pointOfInterest)
+        {
+            _context.PointsOfInterest.Remove(pointOfInterest);
+        }
+
         public IEnumerable<City> GetCities()
         {
             return _context.Cities.OrderBy(x => x.Name).ToList();
         }
 
-        public City GetCity(int cityId, bool includePointOfInterest)
+        public City GetCity(int cityId, bool includePointOfinterst)
         {
-            if (includePointOfInterest)
+            if (includePointOfinterst)
             {
                 return _context.Cities.Include(x => x.PointsOfInterest)
                     .Where(x => x.Id == cityId).FirstOrDefault();
